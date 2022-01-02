@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 import 'package:weather/bloc/location_bloc.dart';
 import 'package:weather/bloc/weather_bloc.dart';
 import 'package:weather/model/weathers.dart';
@@ -164,7 +165,7 @@ class _WeekWeatherViewState extends State<WeekWeatherView> {
         if(showDate)
         Text(isToday ?
           "Today" :
-          formattedDate(DateTime.fromMillisecondsSinceEpoch(weather.dateTimestamp! * 1000)),
+          DateFormat('EEEE').format(DateTime.fromMillisecondsSinceEpoch(weather.dateTimestamp! * 1000)),
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold

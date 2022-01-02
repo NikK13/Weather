@@ -1,6 +1,6 @@
 class SingleHourWeather{
   int? dateTimestamp;
-  double? temperature;
+  num? temperature;
   WeatherHourlyInfo? weatherHourlyInfo;
 
   SingleHourWeather({
@@ -12,7 +12,7 @@ class SingleHourWeather{
   factory SingleHourWeather.fromJson(Map<String, dynamic> json){
     return SingleHourWeather(
       dateTimestamp: json['dt'] as int,
-      temperature: json['temp'] as double?,
+      temperature: json['temp'],
       weatherHourlyInfo: WeatherHourlyInfo.fromJson(json['weather'][0])
     );
   }

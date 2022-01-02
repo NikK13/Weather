@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:share/share.dart';
 import 'package:weather/bloc/location_bloc.dart';
 import 'package:weather/bloc/weather_bloc.dart';
 import 'package:weather/model/weather.dart';
@@ -154,7 +155,7 @@ class _TodayWeatherViewState extends State<TodayWeatherView> {
                     const SizedBox(width: 6),
                     Container(
                       color: Colors.blueAccent,
-                      width: 2, height: 30,
+                      width: 1.5, height: 28,
                     ),
                     const SizedBox(width: 6),
                     Text(
@@ -178,7 +179,7 @@ class _TodayWeatherViewState extends State<TodayWeatherView> {
             child: Column(
               children: [
                 WeatherTodayInfoItem(
-                  icon: Icons.wb_cloudy_outlined,
+                  icon: CupertinoIcons.cloud_drizzle,
                   info: "${weather.cloudsInfo!.all} %",
                 ),
                 WeatherTodayInfoItem(
@@ -209,12 +210,15 @@ class _TodayWeatherViewState extends State<TodayWeatherView> {
             ),
             child: Center(
               child: GestureDetector(
+                onTap: (){
+                  Share.share("Weather at ${weather.city} is now ${weather.temperatureInfo!.temperature!.round()}°C");
+                },
                 child: Text(
                   "Share",
                   style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.yellow.shade700
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.yellow.shade700
                   ),
                 ),
               ),
@@ -230,53 +234,49 @@ class _TodayWeatherViewState extends State<TodayWeatherView> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 8),
-                Image.network(
-                  "http://openweathermap.org/img/w/" + weather.weatherInfo!.icon! + ".png",
-                  width: 100, height: 100,
-                  fit: BoxFit.fill,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 8),
+              Image.network(
+                "http://openweathermap.org/img/w/" + weather.weatherInfo!.icon! + ".png",
+                width: 100, height: 100,
+                fit: BoxFit.fill,
+              ),
+              Text(
+                "${weather.city}, ${weather.systemInfo!.country}",
+                style: const TextStyle(
+                  fontSize: 22,
+                  color: Colors.black54
                 ),
-                Text(
-                  "${weather.city}, ${weather.systemInfo!.country}",
-                  style: const TextStyle(
-                    fontSize: 22,
-                    color: Colors.black54
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "${weather.temperatureInfo!.temperature!.round()}°C",
+                    style: const TextStyle(
+                      fontSize: 24,
+                      color: Colors.blueAccent
+                    ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "${weather.temperatureInfo!.temperature!.round()}°C",
-                      style: const TextStyle(
-                        fontSize: 24,
-                        color: Colors.blueAccent
-                      ),
+                  const SizedBox(width: 6),
+                  Container(
+                    color: Colors.blueAccent,
+                    width: 1.5, height: 28,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    "${weather.weatherInfo!.main}",
+                    style: const TextStyle(
+                      fontSize: 24,
+                      color: Colors.blueAccent
                     ),
-                    const SizedBox(width: 6),
-                    Container(
-                      color: Colors.blueAccent,
-                      width: 2, height: 30,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      "${weather.weatherInfo!.main}",
-                      style: const TextStyle(
-                        fontSize: 24,
-                        color: Colors.blueAccent
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
         dividerRow,
@@ -288,7 +288,7 @@ class _TodayWeatherViewState extends State<TodayWeatherView> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   WeatherTodayInfoItem(
-                    icon: Icons.wb_cloudy_outlined,
+                    icon: CupertinoIcons.cloud_drizzle,
                     info: "${weather.cloudsInfo!.all} %",
                   ),
                   WeatherTodayInfoItem(
@@ -306,11 +306,11 @@ class _TodayWeatherViewState extends State<TodayWeatherView> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   WeatherTodayInfoItem(
-                    icon: CupertinoIcons.umbrella,
+                    icon: CupertinoIcons.speedometer,
                     info: "${weather.windInfo!.speed} km/h",
                   ),
                   WeatherTodayInfoItem(
-                    icon: CupertinoIcons.sun_dust_fill,
+                    icon: CupertinoIcons.cloud_download,
                     info: "${weather.visibility} m",
                   )
                 ],
@@ -326,6 +326,9 @@ class _TodayWeatherViewState extends State<TodayWeatherView> {
             ),
             child: Center(
               child: GestureDetector(
+                onTap: (){
+                  Share.share("Weather at ${weather.city} is now ${weather.temperatureInfo!.temperature!.round()}°C");
+                },
                 child: Text(
                   "Share",
                   style: TextStyle(
