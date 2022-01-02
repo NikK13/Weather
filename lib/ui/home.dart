@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:weather/bloc/location_bloc.dart';
+import 'package:weather/bloc/weather_bloc.dart';
 import 'package:weather/fragment/today_fragment.dart';
 import 'package:weather/fragment/week_fragment.dart';
 
@@ -14,6 +16,9 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _currentIndex = 0;
 
+  late LocationBloc _locationBloc;
+  late WeatherBloc _weatherBloc;
+
   @override
   void initState() {
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -21,6 +26,8 @@ class _HomePageState extends State<HomePage> {
       statusBarIconBrightness: Brightness.dark,
       systemNavigationBarColor: Colors.white
     ));
+    _locationBloc = LocationBloc();
+    _weatherBloc = WeatherBloc();
     super.initState();
   }
 
@@ -34,7 +41,7 @@ class _HomePageState extends State<HomePage> {
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.only(
-                  top: 24,
+                  top: 8,
                   left: 16,
                   right: 16,
                   bottom: 0,
@@ -46,8 +53,8 @@ class _HomePageState extends State<HomePage> {
                   child: IndexedStack(
                     index: _currentIndex,
                     children: [
-                      TodayWeatherFragment(),
-                      const WeekWeatherFragment(),
+                      TodayWeatherFragment(locationBloc: _locationBloc, weatherBloc: _weatherBloc),
+                      WeekWeatherFragment(locationBloc: _locationBloc, weatherBloc: _weatherBloc),
                     ],
                   ),
                 )

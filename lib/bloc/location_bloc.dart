@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:weather/bloc/bloc.dart';
+import 'package:weather/bloc/weather_bloc.dart';
 
 class LocationBloc extends BaseBloc{
   final _locationSubject = BehaviorSubject<Position?>();
+  final WeatherBloc weatherBloc = WeatherBloc();
 
   Stream<Position?> get location => _locationSubject.stream;
   Function(Position?) get updateLocation => _locationSubject.sink.add;
@@ -15,7 +16,9 @@ class LocationBloc extends BaseBloc{
 
   Future _determinePosition() async {
     if(await Geolocator.isLocationServiceEnabled()){
-      updateLocation(await Geolocator.getCurrentPosition());
+      final pos = await Geolocator.getCurrentPosition();
+      updateLocation(pos);
+      //weatherBloc.fetchWeather(pos.latitude, pos.longitude);
     }
     else{
       updateLocation(null);
@@ -29,7 +32,9 @@ class LocationBloc extends BaseBloc{
     }
     else{
       if(await Geolocator.isLocationServiceEnabled()){
-        updateLocation(await Geolocator.getCurrentPosition());
+        final pos = await Geolocator.getCurrentPosition();
+        updateLocation(pos);
+        //weatherBloc.fetchWeather(pos.latitude, pos.longitude);
       }
       else{
         await Geolocator.openLocationSettings();
@@ -40,7 +45,6 @@ class LocationBloc extends BaseBloc{
 
   @override
   void dispose() {
-    // TODO: implement dispose
+    _locationSubject.close();
   }
-
 }
