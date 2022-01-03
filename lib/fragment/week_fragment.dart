@@ -1,41 +1,57 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:weather/bloc/location_bloc.dart';
-import 'package:weather/bloc/weather_bloc.dart';
+import 'package:weather/flutter_bloc/bloc/location_fetch_bloc.dart';
+import 'package:weather/flutter_bloc/bloc/weather_week_fetch_bloc.dart';
+import 'package:weather/flutter_bloc/events/location_events.dart';
+import 'package:weather/flutter_bloc/events/weather_week_events.dart';
+import 'package:weather/flutter_bloc/states/location_states.dart';
+import 'package:weather/flutter_bloc/states/weather_week_states.dart';
 import 'package:weather/model/weathers.dart';
 
-class WeekWeatherFragment extends StatelessWidget {
-  final LocationBloc? locationBloc;
-  final WeatherBloc? weatherBloc;
+class WeekWeatherFragment extends StatefulWidget {
+  final LocationFetchBloc? locationFetchBloc;
+  final WeatherWeekFetchBloc? weatherFetchBloc;
 
-  const WeekWeatherFragment({Key? key, this.locationBloc, this.weatherBloc}) : super(key: key);
+  const WeekWeatherFragment({
+    Key? key,
+    this.locationFetchBloc,
+    this.weatherFetchBloc
+  }) : super(key: key);
+
+  @override
+  State<WeekWeatherFragment> createState() => _WeekWeatherFragmentState();
+}
+
+class _WeekWeatherFragmentState extends State<WeekWeatherFragment> {
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: StreamBuilder(
-          stream: locationBloc!.location,
-          builder: (context, AsyncSnapshot<Position?> snapshot) {
-            //debugPrint("Connect: ${snapshot.connectionState},${snapshot.data}");
-            if(snapshot.connectionState == ConnectionState.active){
-              if(snapshot.hasData){
-                return WeekWeatherView(
-                  lat: snapshot.data!.latitude,
-                  lng: snapshot.data!.longitude,
-                  weatherBloc: weatherBloc,
-                );
-              }
-              else{
-                return locationDisabled();
-              }
-            }
-            else{
-              return const Center(child: CircularProgressIndicator());
-            }
+      child: BlocBuilder(
+        bloc: widget.locationFetchBloc,
+        builder: (context, state){
+          if(state is LocationFetchedState){
+            final pos = state.position;
+            return WeekWeatherView(
+              lat: pos!.latitude,
+              lng: pos.longitude,
+              weatherBloc: widget.weatherFetchBloc,
+            );
           }
-      ),
+          else if(state is LocationErrorState){
+            return locationDisabled();
+          }
+          else {
+            return const Center(child: CircularProgressIndicator());
+          }
+        },
+      )
     );
   }
 
@@ -55,8 +71,8 @@ class WeekWeatherFragment extends StatelessWidget {
         const SizedBox(height: 8),
         ElevatedButton(
           child: const Text("Check location"),
-          onPressed: () async{
-            await locationBloc!.checkLocation();
+          onPressed: (){
+            widget.locationFetchBloc!.add(LocationFetchEvent());
           },
         ),
       ],
@@ -66,7 +82,7 @@ class WeekWeatherFragment extends StatelessWidget {
 
 class WeekWeatherView extends StatefulWidget {
   final double? lat, lng;
-  final WeatherBloc? weatherBloc;
+  final WeatherWeekFetchBloc? weatherBloc;
 
   const WeekWeatherView({Key? key, this.lat, this.lng, this.weatherBloc}) : super(key: key);
 
@@ -75,41 +91,44 @@ class WeekWeatherView extends StatefulWidget {
 }
 
 class _WeekWeatherViewState extends State<WeekWeatherView> {
-
   @override
   void initState() {
-    widget.weatherBloc!.fetchListOfWeather(widget.lat!, widget.lng!);
+    widget.weatherBloc!.add(
+      WeekFetchEvent(
+        lat: widget.lat,
+        lng: widget.lng,
+      )
+    );
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: widget.weatherBloc!.weatherListStream,
-      builder: (context, AsyncSnapshot<WeekWeather?> snapshot){
-        if(snapshot.connectionState == ConnectionState.active){
-          if(snapshot.hasData){
-            return Scaffold(
-              appBar: CupertinoNavigationBar(
-                middle: Text("${snapshot.data!.cityWeather!.cityName}"),
-                backgroundColor: Colors.white,
-              ),
+    return BlocBuilder(
+      bloc: widget.weatherBloc,
+      builder: (context, state){
+        if(state is WeatherWeekFetchedState){
+          return Scaffold(
+            appBar: CupertinoNavigationBar(
+              middle: Text("${state.weekWeather!.cityWeather!.cityName}"),
               backgroundColor: Colors.white,
-              body: Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: buildForecastView(snapshot.data!.weatherList!),
-              ),
-            );
-          }
+            ),
+            backgroundColor: Colors.white,
+            body: Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: buildForecastView(state.weekWeather!.weatherList!),
+            ),
+          );
+        }
+        else if(state is WeatherWeekErrorState){
           return const Scaffold(
             backgroundColor: Colors.white,
             body: Center(child: Text("No data")),
           );
         }
-        return const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-          backgroundColor: Colors.white,
-        );
+        else{
+          return const Center(child: CircularProgressIndicator());
+        }
       },
     );
   }

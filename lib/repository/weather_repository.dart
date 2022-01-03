@@ -12,9 +12,7 @@ class WeatherRepository{
     try{
       res = await Client().get(Uri.parse(url));
       if(res.statusCode == 200){
-        final weather = WeatherToday.fromJson(jsonDecode(res.body));
-        //debugPrint("${weather.temperatureInfo!.temperature}");
-        return weather;
+        return WeatherToday.fromJson(jsonDecode(res.body));
       }
       else {
         return null;
@@ -32,8 +30,7 @@ class WeatherRepository{
       res = await Client().get(Uri.parse(url));
       //debugPrint(res.body);
       if(res.statusCode == 200){
-        final weather = WeekWeather.fromJson(jsonDecode(res.body));
-        return weather;
+        return WeekWeather.fromJson(jsonDecode(res.body));
       }
       else {
         return null;

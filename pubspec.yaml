@@ -39,6 +39,7 @@ dependencies:
   geolocator: ^8.0.1
   share: ^2.0.4
   intl: ^0.17.0
+  flutter_bloc: 7.0.0
 
 dev_dependencies:
   flutter_test:

@@ -50,7 +50,7 @@ class SingleWeather{
 
   factory SingleWeather.fromJson(Map<String, dynamic> json){
     return SingleWeather(
-      dateTimestamp: json['dt'] as int,
+      dateTimestamp: json['dt'],
       mainWeatherInfo: MainWeatherInfo.fromJson(json['main']),
       weatherInfo: WeatherInfo.fromJson(json['weather'][0])
     );
@@ -58,7 +58,7 @@ class SingleWeather{
 }
 
 class MainWeatherInfo {
-  final double? temp;
+  final num? temp;
 
   MainWeatherInfo({this.temp});
 

@@ -1,41 +1,57 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share/share.dart';
-import 'package:weather/bloc/location_bloc.dart';
-import 'package:weather/bloc/weather_bloc.dart';
+import 'package:weather/flutter_bloc/bloc/location_fetch_bloc.dart';
+import 'package:weather/flutter_bloc/bloc/weather_today_fetch_bloc.dart';
+import 'package:weather/flutter_bloc/events/location_events.dart';
+import 'package:weather/flutter_bloc/events/weather_today_events.dart';
+import 'package:weather/flutter_bloc/states/location_states.dart';
+import 'package:weather/flutter_bloc/states/weather_today_states.dart';
 import 'package:weather/model/weather.dart';
 
-class TodayWeatherFragment extends StatelessWidget {
-  final LocationBloc? locationBloc;
-  final WeatherBloc? weatherBloc;
+class TodayWeatherFragment extends StatefulWidget {
+  final LocationFetchBloc? locationFetchBloc;
+  final WeatherTodayFetchBloc? weatherFetchBloc;
 
-  const TodayWeatherFragment({Key? key, this.locationBloc, this.weatherBloc}) : super(key: key);
+  const TodayWeatherFragment({
+    Key? key,
+    this.locationFetchBloc,
+    this.weatherFetchBloc,
+  }) : super(key: key);
+
+  @override
+  State<TodayWeatherFragment> createState() => _TodayWeatherFragmentState();
+}
+
+class _TodayWeatherFragmentState extends State<TodayWeatherFragment> {
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: StreamBuilder(
-        stream: locationBloc!.location,
-        builder: (context, AsyncSnapshot<Position?> snapshot) {
-          //debugPrint("Connect: ${snapshot.connectionState},${snapshot.data}");
-          if(snapshot.connectionState == ConnectionState.active){
-            if(snapshot.hasData){
-              return TodayWeatherView(
-                lat: snapshot.data!.latitude,
-                lng: snapshot.data!.longitude,
-                weatherBloc: weatherBloc,
-              );
-            }
-            else{
-              return locationDisabled();
-            }
+      child: BlocBuilder(
+        bloc: widget.locationFetchBloc,
+        builder: (context, state){
+          if(state is LocationFetchedState){
+            final pos = state.position;
+            return TodayWeatherView(
+              lat: pos!.latitude,
+              lng: pos.longitude,
+              weatherBloc: widget.weatherFetchBloc,
+            );
           }
-          else{
+          else if(state is LocationErrorState){
+            return locationDisabled();
+          }
+          else {
             return const Center(child: CircularProgressIndicator());
           }
-        }
-      ),
+        },
+      )
     );
   }
 
@@ -55,8 +71,8 @@ class TodayWeatherFragment extends StatelessWidget {
         const SizedBox(height: 8),
         ElevatedButton(
           child: const Text("Check location"),
-          onPressed: () async{
-            await locationBloc!.checkLocation();
+          onPressed: (){
+            widget.locationFetchBloc!.add(LocationFetchEvent());
           },
         ),
       ],
@@ -66,7 +82,7 @@ class TodayWeatherFragment extends StatelessWidget {
 
 class TodayWeatherView extends StatefulWidget {
   final double? lat, lng;
-  final WeatherBloc? weatherBloc;
+  final WeatherTodayFetchBloc? weatherBloc;
 
   const TodayWeatherView({Key? key, this.lat, this.lng, this.weatherBloc}) : super(key: key);
 
@@ -75,10 +91,14 @@ class TodayWeatherView extends StatefulWidget {
 }
 
 class _TodayWeatherViewState extends State<TodayWeatherView> {
-
   @override
   void initState() {
-    widget.weatherBloc!.fetchWeather(widget.lat!, widget.lng!);
+    widget.weatherBloc!.add(
+      TodayFetchEvent(
+        lat: widget.lat,
+        lng: widget.lng
+      )
+    );
     super.initState();
   }
 
@@ -90,18 +110,22 @@ class _TodayWeatherViewState extends State<TodayWeatherView> {
         backgroundColor: Colors.white,
       ),
       backgroundColor: Colors.white,
-      body: StreamBuilder(
-        stream: widget.weatherBloc!.weatherTodayStream,
-        builder: (context, AsyncSnapshot<WeatherToday?> snapshot){
-          if(snapshot.connectionState == ConnectionState.active){
-            if(snapshot.hasData){
-              return buildTodayView(snapshot.data!);
-            }
-            else{
-              return const Center(child: Text("Empty data"));
-            }
+      body: BlocBuilder(
+        bloc: widget.weatherBloc,
+        builder: (context, state){
+          if(state is WeatherTodayFetchedState){
+            return buildTodayView(state.todayWeather!);
           }
-          return const Center(child: CircularProgressIndicator());
+          else if(state is WeatherTodayErrorState){
+            return const Center(
+              child: Text("Empty data")
+            );
+          }
+          else{
+            return const Center(
+              child: CircularProgressIndicator()
+            );
+          }
         },
       )
     );
