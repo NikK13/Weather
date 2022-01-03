@@ -1,34 +1,84 @@
-class SingleHourWeather{
-  int? dateTimestamp;
-  num? temperature;
-  WeatherHourlyInfo? weatherHourlyInfo;
+class WeekWeather{
+  List<SingleWeather>? weatherList;
+  CityWeather? cityWeather;
 
-  SingleHourWeather({
-    this.dateTimestamp,
-    this.temperature,
-    this.weatherHourlyInfo,
+  WeekWeather({
+    this.weatherList,
+    this.cityWeather,
   });
 
-  factory SingleHourWeather.fromJson(Map<String, dynamic> json){
-    return SingleHourWeather(
-      dateTimestamp: json['dt'] as int,
-      temperature: json['temp'],
-      weatherHourlyInfo: WeatherHourlyInfo.fromJson(json['weather'][0])
+  static List<SingleWeather> getList(Map<String, dynamic> parsedJson){
+    List<SingleWeather> data = [];
+    if(parsedJson['list'] != null) {
+      parsedJson['list'].forEach((element) {
+        data.add(SingleWeather.fromJson(element));
+      });
+    }
+    return data;
+  }
+
+  factory WeekWeather.fromJson(Map<String, dynamic> json){
+    return WeekWeather(
+      weatherList: getList(json),
+      cityWeather: CityWeather.fromJson(json['city'])
     );
   }
 }
 
-class WeatherHourlyInfo {
+class CityWeather{
+  String? cityName;
+
+  CityWeather({this.cityName});
+
+  factory CityWeather.fromJson(Map<String, dynamic> json){
+    return CityWeather(
+      cityName: json['name']
+    );
+  }
+}
+
+class SingleWeather{
+  int? dateTimestamp;
+  WeatherInfo? weatherInfo;
+  MainWeatherInfo? mainWeatherInfo;
+
+  SingleWeather({
+    this.dateTimestamp,
+    this.weatherInfo,
+    this.mainWeatherInfo
+  });
+
+  factory SingleWeather.fromJson(Map<String, dynamic> json){
+    return SingleWeather(
+      dateTimestamp: json['dt'] as int,
+      mainWeatherInfo: MainWeatherInfo.fromJson(json['main']),
+      weatherInfo: WeatherInfo.fromJson(json['weather'][0])
+    );
+  }
+}
+
+class MainWeatherInfo {
+  final double? temp;
+
+  MainWeatherInfo({this.temp});
+
+  factory MainWeatherInfo.fromJson(Map<String, dynamic> json) {
+    final temp = json['temp'];
+    return MainWeatherInfo(temp: temp);
+  }
+}
+
+class WeatherInfo {
   final String? description;
   final String? main;
   final String? icon;
 
-  WeatherHourlyInfo({this.description, this.icon, this.main});
+  WeatherInfo({this.description, this.icon, this.main});
 
-  factory WeatherHourlyInfo.fromJson(Map<String, dynamic> json) {
+  factory WeatherInfo.fromJson(Map<String, dynamic> json) {
     final description = json['description'];
     final icon = json['icon'];
     final main = json['main'];
-    return WeatherHourlyInfo(description: description, icon: icon, main: main);
+    return WeatherInfo(description: description, icon: icon, main: main);
   }
 }

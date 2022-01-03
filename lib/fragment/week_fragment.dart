@@ -86,18 +86,18 @@ class _WeekWeatherViewState extends State<WeekWeatherView> {
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: widget.weatherBloc!.weatherListStream,
-      builder: (context, AsyncSnapshot<List<SingleHourWeather>?> snapshot){
+      builder: (context, AsyncSnapshot<WeekWeather?> snapshot){
         if(snapshot.connectionState == ConnectionState.active){
           if(snapshot.hasData){
             return Scaffold(
-              appBar: const CupertinoNavigationBar(
-                middle: Text("Forecast"),
+              appBar: CupertinoNavigationBar(
+                middle: Text("${snapshot.data!.cityWeather!.cityName}"),
                 backgroundColor: Colors.white,
               ),
               backgroundColor: Colors.white,
               body: Padding(
                 padding: const EdgeInsets.only(top: 16),
-                child: buildForecastView(snapshot.data!),
+                child: buildForecastView(snapshot.data!.weatherList!),
               ),
             );
           }
@@ -114,7 +114,7 @@ class _WeekWeatherViewState extends State<WeekWeatherView> {
     );
   }
 
-  Widget buildForecastView(List<SingleHourWeather> weatherList){
+  Widget buildForecastView(List<SingleWeather> weatherList){
     return OrientationBuilder(
       builder: (context, orientation){
         if(orientation == Orientation.portrait){
@@ -129,7 +129,7 @@ class _WeekWeatherViewState extends State<WeekWeatherView> {
     return DateTime(date.year, date.month, date.day);
   }
 
-  Widget buildForecastViewPortrait(List<SingleHourWeather> weatherList){
+  Widget buildForecastViewPortrait(List<SingleWeather> weatherList){
     return ListView.builder(
       itemCount: weatherList.length,
       shrinkWrap: true,
@@ -158,7 +158,7 @@ class _WeekWeatherViewState extends State<WeekWeatherView> {
     return "${date.hour}:$min";
   }
 
-  Widget portraitItem(SingleHourWeather weather, bool showDate, bool isToday){
+  Widget portraitItem(SingleWeather weather, bool showDate, bool isToday){
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -174,7 +174,7 @@ class _WeekWeatherViewState extends State<WeekWeatherView> {
         Row(
           children: [
             Image.network(
-              "http://openweathermap.org/img/w/" + weather.weatherHourlyInfo!.icon! + ".png",
+              "http://openweathermap.org/img/w/" + weather.weatherInfo!.icon! + ".png",
               width: 100, height: 100, fit: BoxFit.fill,
             ),
             const SizedBox(width: 8),
@@ -189,7 +189,7 @@ class _WeekWeatherViewState extends State<WeekWeatherView> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    weather.weatherHourlyInfo!.main!,
+                    weather.weatherInfo!.main!,
                     style: const TextStyle(fontSize: 16, color: Colors.black),
                   )
                 ],
@@ -197,7 +197,7 @@ class _WeekWeatherViewState extends State<WeekWeatherView> {
             ),
             const SizedBox(width: 8),
             Text(
-              "${weather.temperature!.round()}°",
+              "${weather.mainWeatherInfo!.temp!.round()}°",
               style: const TextStyle(
                 fontSize: 36,
                 color: Colors.blueAccent,
